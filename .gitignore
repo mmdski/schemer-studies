@@ -6,4 +6,8 @@
 *.scm#*
 .#*.scm
 
+*.el~
+*.el#*
+.#*.el
+
 .DS_Store
