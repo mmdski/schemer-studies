@@ -544,7 +544,7 @@ When recurring on a number, /n/, ask two questions about it: (/zero? n/) and els
        (else (cons (car lat) (rempick (sub1 n) (cdr lat)))))))
 #+end_src
 
-* DONE Chapter 05: \*Oh My Gawd\*: It's Full of Stars
+* DONE Chapter 05: =*Oh My Gawd*=: It's Full of Stars
 CLOSED: [2025-10-12 Sun 21:01]
 :PROPERTIES:
 :header-args:scheme: :session tls05
@@ -785,3 +785,69 @@ Simplify only after the function is correct.
        (else (cons (car l)
                    (rember s (cdr l)))))))
 #+end_src
+
+* DONE Chapter 06: Shadows
+CLOSED: [2025-10-26 Sun 19:34]
+:PROPERTIES:
+:header-args:scheme: :session tls06
+:END:
+
+#+begin_src scheme :results none :tangle "tls.scm"
+  (define numbered?
+    (lambda (aexp)
+      (cond
+       ((atom? aexp) (number? aexp))
+       (else
+        (and (numbered? (car aexp))
+             (numbered?
+              (car (cdr (cdr aexp)))))))))
+#+end_src
+
+#+begin_src scheme :results none
+  (define value
+    (lambda (nexp)
+      (cond
+       ((atom? nexp) nexp)
+       ((eq? (car nexp) '+)
+        (o+ (value (cdr nexp))
+            (value (cdr (cdr nexp)))))
+       ((eq? (car nexp) '*)
+        (o* (value (cdr nexp))
+            (value (cdr (cdr nexp)))))
+       (else
+        (exp (value (cdr nexp))
+             (value (cdr (cdr nexp))))))))
+#+end_src
+
+#+begin_src scheme :results none :tangle "tls.scm"
+  (define 1st-sub-exp
+    (lambda (aexp)
+      (car (cdr aexp))))
+
+  (define 2nd-sub-exp
+    (lambda (aexp)
+      (car (cdr (cdr aexp)))))
+
+  (define operator
+    (lambda (aexp)
+      (car aexp)))
+
+  (define value
+    (lambda (nexp)
+      (cond
+       ((atom? nexp) nexp)
+       ((eq? (operator nexp) '+)
+        (o+ (value (1st-sub-exp nexp))
+            (value (2nd-sub-exp nexp))))
+       ((eq? (operator nexp) '*)
+        (o* (value (1st-sub-exp nexp))
+            (value (2nd-sub-exp nexp))))
+       (else
+        (expt (value (1st-sub-exp nexp))
+              (value (2nd-sub-exp nexp)))))))
+#+end_src
+
+* TODO Chapter 07: Friends and Relations
+:PROPERTIES:
+:header-args:scheme: :session tls07
+:END:
