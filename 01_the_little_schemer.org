@@ -24,7 +24,7 @@ Call org-babel-tangle (C-c C-v t is the default binding) to generate tls.scm.
 #+end_src
 
 * DONE Chapter 01: Toys
-CLOSED: [2025-09-14 Sun 09:46]
+CLOSED: [2026-04-19 Sun 09:35]
 :PROPERTIES:
 :header-args:scheme: :session tls01
 :END:
@@ -32,13 +32,6 @@ CLOSED: [2025-09-14 Sun 09:46]
 #+begin_src scheme :results none
   (load "tls.scm")
 #+end_src
-
-#+begin_src scheme
-  (atom? 'atom)
-#+end_src
-
-#+RESULTS:
-: #t
 
 ** The Law of Car
 The primitive /car/ is defined only for non-empty lists.
@@ -49,17 +42,6 @@ The primitive /cdr/ is defined only for non-empty lists. The /cdr/ of any non-em
 ** The Law of Cons
 The primitive /cons/ takes two arguments. The second argument to /cons/ must be a list. The result is a list.
 
-*** What is (cons s (car l)) where s is a and l is ((b) c d)?
-
-#+begin_src scheme
-  (cons 'a (car '((b) c d)))
-#+end_src
-
-#+RESULTS:
-| a | b |
-
-src_scheme{(cons 'a '((b) c d))} is src_scheme{'(a b)} because src_scheme{(car '((b) c d))} is src_scheme{'(b)} and src_scheme{(cons 'a '(b))} is src_scheme{'(a b)}.
-
 ** The Law of Null?
 The primitive /null?/ is defined only for lists.
 
@@ -67,7 +49,7 @@ The primitive /null?/ is defined only for lists.
 The primitive /eq?/ takes two arguments. Each must be a non-numeric atom.
 
 * DONE Chapter 02: Do It, Do It Again, and Again, and Again...
-CLOSED: [2025-09-14 Sun 19:48]
+CLOSED: [2026-04-19 Sun 15:05]
 :PROPERTIES:
 :header-args:scheme: :session tls02
 :END:
@@ -92,96 +74,22 @@ CLOSED: [2025-09-14 Sun 19:48]
     (load "tls.scm")
 #+end_src
 
-#+begin_src scheme
-  (member? 'meat '(potatoes and meat gravy))
-#+end_src
-
-#+RESULTS:
-: #t
-
-#+begin_src scheme
-  (member? 'liver '(bagels and lox))
-#+end_src
-
-#+RESULTS:
-: #f
-
 ** The First Commandment
 (/preliminary/)
 
 Always ask /null?/ as the first question in expressing any function.
 
 * DONE Chapter 03: Cons the Magnificent
-CLOSED: [2025-09-29 Mon 19:23]
+CLOSED: [2026-04-29 Wed 18:33]
 :PROPERTIES:
 :header-args:scheme: :session tls03
 :END:
 
 #+begin_src scheme :results none
-  (define rember
-    (lambda (a lat)
-      (cond
-       ((null? lat) '())
-       (else (cond
-              ((eq? (car lat) a) (cdr lat))
-              (else (rember a (cdr lat))))))))
+    (load "tls.scm")
 #+end_src
 
-#+begin_src scheme
-  (rember 'bacon '(bacon lettuce and tomato))
-#+end_src
-
-#+RESULTS:
-| lettuce | and | tomato |
-
-#+begin_src scheme
-  (rember 'and '(bacon lettuce and tomato))
-#+end_src
-
-#+RESULTS:
-| tomato |
-
-*The Second Commandment*
-Use /cons/ to build lists.
-
-#+begin_src scheme :results none
-  (define rember
-    (lambda (a lat)
-      (cond
-        ((null? lat) '())
-        (else (cond
-                ((eq? (car lat) a) (cdr lat))
-                (else (cons (car lat)
-                            (rember a (cdr lat)))))))))
-#+end_src
-
-#+begin_src scheme
-  (rember 'and '(bacon lettuce and tomato))
-#+end_src
-
-#+RESULTS:
-| bacon | lettuce | tomato |
-
-#+begin_src scheme :results none
-  (define rember
-    (lambda (a lat)
-      (cond
-       ((null? lat) '())
-       ((eq? (car lat) a) (cdr lat))
-       (else (cons (car lat)
-                   (rember a (cdr lat)))))))
-#+end_src
-
-#+begin_src scheme
-  (rember 'and '(bacon lettuce and tomato))
-#+end_src
-
-#+RESULTS:
-| bacon | lettuce | tomato |
-
-*The Third Commandment*
-When building a list, describe the first typical element, then /cons/ it onto the natural recursion.
-
+** firsts
 #+begin_src scheme :tangle "tls.scm" :results none
   (define firsts
     (lambda (l)
@@ -191,52 +99,7 @@ When building a list, describe the first typical element, then /cons/ it onto th
                    (firsts (cdr l)))))))
 #+end_src
 
-#+begin_src scheme
-  (firsts '((a b) (c d) (e f)))
-#+end_src
-
-#+RESULTS:
-| a | c | e |
-
-#+begin_src scheme
-  (define insertR
-    (lambda (new old lat)
-      (cond
-       ((null? lat) ('()))
-       (else
-        (cond
-         ((eq? (car lat) old) (cdr lat))
-         (else (cons (car lat)
-                     (insertR new old
-                              (cdr lat)))))))))
-#+end_src
-
-#+begin_src scheme
-  (insertR 'topping 'fudge '(ice cream with fudge for dessert))
-#+end_src
-
-#+RESULTS:
-| ice | cream | with | for | dessert |
-
-#+begin_src scheme :results none
-  (define insertR
-    (lambda (new old lat)
-      (cond
-       ((null? lat) '())
-       (else (cond
-              ((eq? (car lat) old)
-               (cons new (cdr lat)))
-              (else (cons (car lat)
-                          (insertR new old
-                                   (cdr lat)))))))))
-#+end_src
-
-#+begin_src scheme
-  (insertR 'topping 'fudge '(ice cream with fudge for dessert))
-#+end_src
-
-#+RESULTS:
-| ice | cream | with | topping | for | dessert |
+** insertR
 
 #+begin_src scheme :tangle "tls.scm" :results none
   (define insertR
@@ -253,12 +116,7 @@ When building a list, describe the first typical element, then /cons/ it onto th
 
 #+end_src
 
-#+begin_src scheme
-  (insertR 'topping 'fudge '(ice cream with fudge for dessert))
-#+end_src
-
-#+RESULTS:
-| ice | cream | with | fudge | topping | for | dessert |
+** insertL
 
 #+begin_src scheme :tangle "tls.scm" :results none
   (define insertL
@@ -274,6 +132,8 @@ When building a list, describe the first typical element, then /cons/ it onto th
 
 #+end_src
 
+** subst
+
 #+begin_src scheme :tangle "tls.scm" :results none
   (define subst
     (lambda (new old lat)
@@ -288,6 +148,8 @@ When building a list, describe the first typical element, then /cons/ it onto th
 
 #+end_src
 
+** subst2
+
 #+begin_src scheme :tangle "tls.scm" :results none
   (define subst2
     (lambda (new o1 o2 lat)
@@ -297,10 +159,12 @@ When building a list, describe the first typical element, then /cons/ it onto th
               ((or (eq? (car lat) o1) (eq? (car lat) o2))
                (cons new (cdr lat)))
               (else (cons (car lat)
-                          (subst new old
+                          (subst2 new o1 o2
                                  (cdr lat)))))))))
 
 #+end_src
+
+** multirember
 
 #+begin_src scheme :tangle "tls.scm" :results none
   (define multirember
@@ -315,6 +179,8 @@ When building a list, describe the first typical element, then /cons/ it onto th
                      (multirember a
                                   (cdr lat)))))))))
 #+end_src
+
+** multiinsertR
 
 #+begin_src scheme :tangle "tls.scm" :results none
   (define multiinsertR
@@ -333,32 +199,27 @@ When building a list, describe the first typical element, then /cons/ it onto th
                                    (cdr lat)))))))))
 #+end_src
 
+** The Second Commandment
+Use /cons/ to build lists.
+
+** The Third Commandment
+When building a list, describe the first typical element, then /cons/ it onto the natural recursion.
+
 * DONE Chapter 04: Numbers Games
-CLOSED: [2025-10-10 Fri 14:55]
+CLOSED: [2026-04-29 Wed 20:23]
 :PROPERTIES:
 :header-args:scheme: :session tls04
 :END:
 
-#+begin_src scheme
-  (add1 67)
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define add1
+    (lambda (n)
+      (+ n 1)))
+
+  (define sub1
+    (lambda (n)
+      (- n 1)))
 #+end_src
-
-#+RESULTS:
-: 68
-
-#+begin_src scheme
-  (sub1 5)
-#+end_src
-
-#+RESULTS:
-: 4
-
-#+begin_src scheme
-  (sub1 0)
-#+end_src
-
-#+RESULTS:
-: -1
 
 #+begin_src scheme :tangle "tls.scm" :results none
   (define o+
@@ -373,19 +234,6 @@ CLOSED: [2025-10-10 Fri 14:55]
        ((zero? m) n)
        (else (sub1 (o- n (sub1 m)))))))
        #+end_src
-
-*The First Commandment*
-(/first revision/)
-When recurring on a list of atoms, /lat/, ask two questions about it: (/null? lat/) and else.
-When recurring on a number, /n/, ask two questions about it: (/zero? n/) and else.
-
-#+begin_src scheme
-  (define addtup
-    (lambda (tup)
-      (cond
-       ((null? tup) 0)
-       (else (o+ (car tup) (addtup (cdr tup)))))))
-#+end_src
 
 #+begin_src scheme :tangle "tls.scm" :results none
   (define o*
@@ -406,15 +254,6 @@ When recurring on a number, /n/, ask two questions about it: (/zero? n/) and els
               (tup+ (cdr tup1) (cdr tup2)))))))
 #+end_src
 
-#+begin_src scheme :results none
-  (define >
-    (lambda (n m)
-      (cond
-       ((zero? m) #t)
-       ((zero? n) #f)
-       (else (> (sub1 n) (sub1 m))))))
-#+end_src
-
 #+begin_src scheme :results none :tangle "tls.scm"
   (define >
     (lambda (n m)
@@ -433,15 +272,6 @@ When recurring on a number, /n/, ask two questions about it: (/zero? n/) and els
        (else (< (sub1 n) (sub1 m))))))
 #+end_src
 
-#+begin_src scheme :results none
-  (define =
-    (lambda (n m)
-      (cond
-       ((zero? m) (zero? n))
-       ((zero? n) #f)
-       (else (= (sub1 n) (sub1 m))))))
-#+end_src
-
 #+begin_src scheme :results none :tangle "tls.scm"
   (define =
     (lambda (n m)
@@ -455,7 +285,7 @@ When recurring on a number, /n/, ask two questions about it: (/zero? n/) and els
   (define expt
     (lambda (n m)
       (cond
-       ((zero? m 0) 1)
+       ((zero? m) 1)
        (else (o* n (expt n (sub1 m)))))))
 #+end_src
 
@@ -481,14 +311,6 @@ When recurring on a number, /n/, ask two questions about it: (/zero? n/) and els
       (cond
        ((zero? (sub1 n)) (car lat))
        (else (pick (sub1 n) (cdr lat))))))
-#+end_src
-
-#+begin_src scheme :results none
-  (define rempick
-    (lambda (n lat)
-      (cond
-       ((zero? (sub1 n)) (cdr lat))
-       (else (cons (car lat) (rempick (sub1 n) (cdr lat)))))))
 #+end_src
 
 #+begin_src scheme :results none :tangle "tls.scm"
@@ -544,8 +366,13 @@ When recurring on a number, /n/, ask two questions about it: (/zero? n/) and els
        (else (cons (car lat) (rempick (sub1 n) (cdr lat)))))))
 #+end_src
 
+** The First Commandment
+(/first revision/)
+When recurring on a list of atoms, /lat/, ask two questions about it: (/null? lat/) and else.
+When recurring on a number, /n/, ask two questions about it: (/zero? n/) and else.
+
 * DONE Chapter 05: =*Oh My Gawd*=: It's Full of Stars
-CLOSED: [2025-10-12 Sun 21:01]
+CLOSED: [2026-04-29 Wed 20:23]
 :PROPERTIES:
 :header-args:scheme: :session tls05
 :END:
@@ -579,13 +406,13 @@ CLOSED: [2025-10-12 Sun 21:01]
                    (insertR* new old (cdr l)))))))
 #+end_src
 
-*The First Commandment*
+** The First Commandment
 (/final version/)
 When recurring on a list of atoms, /lat/, ask two questions about it: (/null? lat/) and else.
 When recurring on a number, /n/, ask two questions about it: (/zero? n/) and else.
 When recurring on a list of S-expressions, /l/, ask three questions about it: (/null? l/), (/atom?/ (/car l/)), and else.
 
-*The Fourth Commandment*
+** The Fourth Commandment*
 (/final version/)
 Always change at least one argument while recurring. When recurring on a list of atoms, /lat/, use (/cdr lat/). When recurring on a number, /n/, use (/sub1 n/). And when recurring on a list of S-expressions, /l/, use (/car l/) and (/cdr l/) if neither (/null? l/) nor (/atom?/ (/car l/)) are true.
 
@@ -606,20 +433,6 @@ when using /cdr/, test termination with /null?/ and when using /sub1/, test term
        (else (o+ (occur* a (car l)) (occur* a (cdr l)))))))
 #+end_src
 
-#+begin_src scheme
-  (occur* 'banana
-          '((banana)
-            (split ((((banana ice)))
-                    (cream (banana))
-                    sherbert))
-            (banana)
-            (bread)
-            (banana brandy)))
-#+end_src
-
-#+RESULTS:
-: 5
-
 #+begin_src scheme :results none :tangle "tls.scm"
   (define subst*
     (lambda (new old l)
@@ -634,71 +447,6 @@ when using /cdr/, test termination with /null?/ and when using /sub1/, test term
          (cons (subst* new old (car l)) (subst* new old (cdr l)))))))
 #+end_src
 
-#+begin_src scheme :results verbatim
-  (subst* 'orange 'banana
-          '((banana)
-            (split ((((banana ice)))
-                    (cream (banana))
-                    sherbert))
-            (banana)
-            (bread)
-            (banana brandy)))
-#+end_src
-
-#+RESULTS:
-: ((orange) (split ((((orange ice))) (cream (orange)) sherbert)) (orange) (bread) (orange brandy))
-
-#+begin_src scheme :results none
-  (define insertL*
-    (lambda (new old l)
-      (cond
-       ((null? l) '())
-       ((atom? (car l))
-        (cond
-         ((eq? old (car l))
-          (cons new (cons old
-                          (insertL* new old (cdr l)))))
-         (else
-          (cons (car l) (insertL* new old (cdr l))))))
-       (else
-        (cons (insertL* new old (car l))
-              (insertL* new old (cdr l)))))))
-              #+end_src
-
-#+begin_src scheme :results verbatim
-  (insertL* 'pecker 'chuck
-            '((how much (wood))
-              could
-              ((a (wood) chuck))
-              (((chuck)))
-              (if (a) ((wood chuck)))
-              could chuck wood))
-#+end_src
-
-#+RESULTS:
-: ((how much (wood)) could ((a (wood) pecker chuck)) (((pecker chuck))) (if (a) ((wood pecker chuck))) could pecker chuck wood)
-
-#+begin_src scheme :results none
-  (define member*
-    (lambda (a l)
-      (cond
-       ((null? l) #f)
-       ((atom? (car l))
-        (or (eq? (car l) a)
-            (member* a (cdr l))))
-       (else
-        (or (member* a (car l))
-            (member* a (cdr l)))))))
-#+end_src
-
-#+begin_src scheme :results verbatim
-  (member* 'chips
-           '((potato) (chips ((with) fish) (chips))))
-#+end_src
-
-#+RESULTS:
-: #t
-
 #+begin_src scheme :results none :tangle "tls.scm"
   (define leftmost
     (lambda (l)
@@ -706,51 +454,6 @@ when using /cdr/, test termination with /null?/ and when using /sub1/, test term
        ((atom? (car l)) (car l))
        (else (leftmost (car l))))))
 #+end_src
-
-#+begin_src scheme :results verbatim
-  (leftmost
-   '((potato) (chips ((with) fish) (chips))))
-#+end_src
-
-#+RESULTS:
-: potato
-
-#+begin_src scheme :results verbatim
-  (leftmost
-   '(((hot) (tuna (and))) cheese))
-#+end_src
-
-#+RESULTS:
-: hot
-
-#+begin_src scheme :results none
-  (define eqlist?
-    (lambda (l1 l2)
-      (cond
-       ((and (null? l1) (null? l2)) #t)
-       ((or (null? l1) (null? l2)) #f)
-       ((and (atom? (car l1)) (atom? (car l2)))
-        (and (eqan? (car l1) (car l2)) (eqlist? (cdr l1) (cdr l2))))
-       ((or (atom? (car l1)) (atom? (car l2))) #f)
-       (else
-        (and (eqlist? (car l1) (car l2))
-             (eqlist? (cdr l1) (cdr l2)))))))
-#+end_src
-
-#+begin_src scheme :results verbatim
-  (eqlist? '(strawberry ice cream) '(strawberry cream ice))
-#+end_src
-
-#+RESULTS:
-: #f
-
-#+begin_src scheme :results verbatim
-  (eqlist? '(beef ((sausage)) (and (soda)))
-           '(beef ((sausage)) (and (soda))))
-#+end_src
-
-#+RESULTS:
-: #t
 
 #+begin_src scheme :results none :tangle "tls.scm"
   (define equal?
@@ -773,7 +476,7 @@ when using /cdr/, test termination with /null?/ and when using /sub1/, test term
              (eqlist? (cdr l1) (cdr l2)))))))
 #+end_src
 
-*The Sixth Commandment*
+** The Sixth Commandment
 Simplify only after the function is correct.
 
 #+begin_src scheme :results none :tangle "tls.scm"
@@ -787,10 +490,16 @@ Simplify only after the function is correct.
 #+end_src
 
 * DONE Chapter 06: Shadows
-CLOSED: [2025-10-26 Sun 19:34]
+CLOSED: [2026-04-30 Thu 19:12]
 :PROPERTIES:
 :header-args:scheme: :session tls06
 :END:
+
+#+begin_quote
+/What is numbered?/
+
+It is a function that determines whether a representation of an arithmetic expression contains only numbers besides the +, *, and expt
+#+end_quote
 
 #+begin_src scheme :results none :tangle "tls.scm"
   (define numbered?
@@ -808,15 +517,16 @@ CLOSED: [2025-10-26 Sun 19:34]
     (lambda (nexp)
       (cond
        ((atom? nexp) nexp)
-       ((eq? (car nexp) '+)
-        (o+ (value (cdr nexp))
-            (value (cdr (cdr nexp)))))
-       ((eq? (car nexp) '*)
-        (o* (value (cdr nexp))
-            (value (cdr (cdr nexp)))))
+       ((eq? (car (cdr nexp)) '+)
+        (o+ (value (car nexp))
+            (value (car (cdr (cdr nexp))))))
+       ((eq? (car (cdr nexp)) '*)
+        (o* (value (car nexp))
+            (value (car (cdr (cdr nexp))))))
        (else
-        (exp (value (cdr nexp))
-             (value (cdr (cdr nexp))))))))
+        (expt (value (car nexp))
+              (value
+               (car (cdr (cdr nexp)))))))))
 #+end_src
 
 #+begin_src scheme :results none :tangle "tls.scm"
@@ -847,7 +557,386 @@ CLOSED: [2025-10-26 Sun 19:34]
               (value (2nd-sub-exp nexp)))))))
 #+end_src
 
-* TODO Chapter 07: Friends and Relations
+#+begin_src scheme :results none :tangle "tls.scm"
+  (define sero?
+    (lambda (n)
+      (null? n)))
+
+  (define edd1
+    (lambda (n)
+      (cons '() n)))
+
+  (define zub1
+    (lambda (n)
+      (cdr n)))
+#+end_src
+
+* DONE Chapter 07: Friends and Relations
+CLOSED: [2026-05-01 Fri 20:54]
 :PROPERTIES:
 :header-args:scheme: :session tls07
+:END:
+
+#+Begin_src scheme :results none
+  (load "tls.scm")
+#+end_src
+
+** set?
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define set?
+    (lambda (lat)
+      (cond
+       ((null? lat) #t)
+       ((member? (car lat) (cdr lat)) #f)
+       (else (set? (cdr lat))))))
+#+end_src
+
+** makeset
+
+#+begin_src scheme :results none :tangle "tls.scm"
+  (define makeset
+    (lambda (lat)
+      (cond
+       ((null? lat) '())
+       (else (cons (car lat)
+                   (makeset
+                    (multirember (car lat)
+                                 (cdr lat))))))))
+#+end_src
+
+** subset?
+
+#+begin_src scheme :results none
+  (define subset?
+    (lambda (set1 set2)
+      (cond
+       ((null? set1) #t)
+       ((member? (car set1) set2)
+        (subset? (cdr set1) set2))
+       (else #f))))
+#+end_src
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define subset?
+    (lambda (set1 set2)
+      (cond
+       ((null? set1) #t)
+       (else
+        (and (member? (car set1) set2)
+             (subset? (cdr set1) set2))))))
+#+end_src
+
+** eqset?
+
+#+begin_src scheme :results none
+  (define eqset?
+    (lambda (set1 set2)
+      (cond
+       ((subset? set1 set2)
+        (subset? set2 set1))
+       (else #f))))
+#+end_src
+
+#+begin_src scheme :results none
+  (define eqset?
+    (lambda (set1 set2)
+      (cond
+       (else (and (subset? set1 set2)
+                  (subset? set2 set1))))))
+#+end_src
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define eqset?
+    (lambda (set1 set2)
+      (and (subset? set1 set2)
+           (subset? set2 set1))))
+
+#+end_src
+
+** intersect?
+
+#+begin_src scheme :results none
+  (define intersect?
+    (lambda (set1 set2)
+      (cond
+       ((null? set1) #f)
+       ((member? (car set1) set2) #t)
+       (else
+        (intersect? (cdr set1) set2)))))
+#+end_src
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define intersect?
+    (lambda (set1 set2)
+      (cond
+       ((null? set1) #f)
+       (else
+        (or (member? (car set1) set2)
+            (intersect? (cdr set1) set2))))))
+#+end_src
+
+** intersect
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define intersect
+    (lambda (set1 set2)
+      (cond
+       ((null? set1) '())
+       ((member? (car set1) set2)
+        (cons (car set1) (intersect (cdr set1) set2)))
+       (else
+        (intersect (cdr set1) set2)))))
+#+end_src
+
+** union
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define union
+    (lambda (set1 set2)
+      (cond
+       ((null? set1) set2)
+       ((member? (car set1) set2)
+        (union (cdr set1) set2))
+       (else
+        (cons (car set1)
+              (union (cdr set1) set2))))))
+#+end_src
+
+** intersectall
+
+#+begin_src scheme :results none
+  (define intersectall
+    (lambda (l-set)
+      (cond
+       ((null? (cdr l-set)) (car l-set))
+       (else
+        (intersect (car l-set)
+                   (intersectall (cdr l-set)))))))
+#+end_src
+
+#+begin_src scheme
+  (intersectall
+   '((a b c) (c a d e) (e f g h a b)))
+#+end_src
+
+#+RESULTS:
+| a |
+
+#+begin_src scheme
+  (intersectall
+   '((6 pears and)
+     (3 peaches and 6 peppers)
+     (8 pears and 6 plums)
+     (and 6 prunes with some apples)))
+#+end_src
+
+#+RESULTS:
+| 6 | and |
+
+** a-pair
+
+Textbook result
+
+#+begin_src scheme :results none
+  (define a-pair?
+    (lambda (x)
+      (cond
+       ((atom? x) #f)
+       ((null? x) #f)
+       ((null? (cdr x)) #f)
+       ((null? (cdr (cdr x))) #t)
+       (else #f))))
+#+end_src
+
+My version
+
+#+begin_src scheme :results none
+  (define a-pair?
+    (lambda (l)
+      (cond
+       ((null? l) #f)
+       ((atom? l) #f)
+       (else
+        (and
+         (car l)
+         (car (cdr l))
+         (null? (cdr (cdr l))))))))
+#+end_src
+
+#+begin_src scheme
+  (a-pair? '(3 7))
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (a-pair? '((2) (pair)))
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (a-pair? '(full (house)))
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (a-pair? '(3 7 11))
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (a-pair? '())
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (a-pair? 'a)
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme :results none
+  (define first
+    (lambda (p)
+      (cond
+       (else (car p)))))
+
+  (define second
+    (lambda (p)
+      (cond
+       (else (car (cdr p))))))
+
+  (define build
+    (lambda (s1 s2)
+      (cond
+       (else (cons s1
+                   (cons s2 '()))))))
+#+end_src
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define first
+    (lambda (p)
+      (car p)))
+
+  (define second
+    (lambda (p)
+      (car (cdr p))))
+
+  (define build
+    (lambda (s1 s2)
+      (cons s1
+            (cons s2 '()))))
+#+end_src
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define third
+    (lambda (l)
+      (car (cdr (cdr l)))))
+#+end_src
+
+** fun?
+
+Write /fun?/ with /set?/ and /firsts/
+
+#+begin_src scheme :results none
+  (define fun?
+    (lambda (rel)
+      (set? (firsts rel))))
+#+end_src
+
+#+begin_src scheme
+  (fun? '((8 3) (4 2) (7 6) (6 2) (3 4)))
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (fun? '((d 4) (b 0) (b 9) (e 5) (g 4)))
+#+end_src
+
+#+RESULTS:
+: #f
+
+** revrel
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define revrel
+    (lambda (rel)
+      (cond
+       ((null? rel) '())
+       (else
+        (cons (build
+               (second (car rel))
+               (first (car rel)))
+              (revrel (cdr rel)))))))
+#+end_src
+
+#+begin_src scheme
+  (revrel '((8 a) (pumpkin pie) (got sick)))
+#+end_src
+
+#+RESULTS:
+| a    | 8       |
+| pie  | pumpkin |
+| sick | got     |
+
+** fullfun?
+
+#+begin_src scheme :results none
+  (define seconds
+    (lambda (l)
+      (cond
+       ((null? l) '())
+       (else (cons (cdr (car l))
+                   (seconds (cdr l)))))))
+
+  (define fullfun?
+    (lambda (rel)
+      (set? (seconds rel))))
+#+end_src
+
+#+begin_src scheme
+  (fullfun? '((8 3) (4 8) (7 6) (6 2) (3 4)))
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (fullfun? '((grape raisin) (plum prune) (stewed prune)))
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (fullfun? '((grape rasin) (plum prune) (stewed grape)))
+#+end_src
+
+#+RESULTS:
+: #t
+
+** one-to-one?
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define one-to-one?
+    (lambda (fun)
+      (fun? (revrel fun))))
+#+end_src
+
+* TODO Chapter 08: Lambda the Ultimate
+:PROPERTIES:
+:header-args:scheme: :session tls08
 :END:
