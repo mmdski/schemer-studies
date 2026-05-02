@@ -940,3 +940,25 @@ Write /fun?/ with /set?/ and /firsts/
 :PROPERTIES:
 :header-args:scheme: :session tls08
 :END:
+
+#+Begin_src scheme :results none
+  (load "tls.scm")
+#+end_src
+
+* TODO Chapter 09: ... and Again, and Again, and Again, ...
+:PROPERTIES:
+:header-args:scheme: :session tls09
+:END:
+
+#+Begin_src scheme :results none
+  (load "tls.scm")
+#+end_src
+
+* TODO Chapter 10: What Is the Value of All of This?
+:PROPERTIES:
+:header-args:scheme: :session tls10
+:END:
+
+#+Begin_src scheme :results none
+  (load "tls.scm")
+#+end_src
