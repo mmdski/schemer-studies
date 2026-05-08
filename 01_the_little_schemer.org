@@ -936,7 +936,8 @@ Write /fun?/ with /set?/ and /firsts/
       (fun? (revrel fun))))
 #+end_src
 
-* TODO Chapter 08: Lambda the Ultimate
+* DONE Chapter 08: Lambda the Ultimate
+CLOSED: [2026-05-08 Fri 18:07]
 :PROPERTIES:
 :header-args:scheme: :session tls08
 :END:
@@ -944,6 +945,454 @@ Write /fun?/ with /set?/ and /firsts/
 #+Begin_src scheme :results none
   (load "tls.scm")
 #+end_src
+
+** rember-f
+
+#+begin_src scheme :results none
+  (define rember-f
+    (lambda (test? a l)
+      (cond
+       ((null? l) '())
+       ((test? a (car l)) (cdr l))
+       (else (cons (car l)
+                   (rember-f test? a
+                             (cdr l)))))))
+#+end_src
+
+#+begin_src scheme :results none
+  (define rember-f
+    (lambda (test? a l)
+      (cond
+       ((null? l) '())
+       ((test? (car l) a) (cdr l))
+       (else (cons (car l)
+                   (rember-f test? a
+                             (cdr l)))))))
+#+end_src
+
+#+begin_src scheme
+  (rember-f = 5 '(6 2 5 3))
+#+end_src
+
+#+RESULTS:
+| 6 | 2 | 3 |
+
+#+begin_src scheme
+  (rember-f eq? 'jelly '(jelly beans are good))
+#+end_src
+
+#+RESULTS:
+| beans | are | good |
+
+#+begin_src scheme
+  (rember-f equal? '(pop corn) '(lemonade (pop corn) and (cake)))
+#+end_src
+
+#+RESULTS:
+| lemonade | and | (cake) |
+
+** eq?-c
+
+#+begin_src scheme :tangle "tls.scm" :results none
+  (define eq?-c
+    (lambda (a)
+      (lambda (x)
+        (eq? x a))))
+#+end_src
+
+#+begin_src scheme
+  (eq?-c 'salad)
+#+end_src
+
+#+RESULTS:
+: #<procedure 1078b6080 at <unknown port>:445:4 (x)>
+
+#+begin_src scheme :results none
+ (define eq?-salad (eq?-c 'salad))
+#+end_src
+
+#+begin_src scheme
+  (eq?-salad 'salad)
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (eq?-salad 'tuna)
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  ((eq?-c 'salad) 'tuna)
+#+end_src
+
+#+RESULTS:
+: #f
+
+** rember-f
+
+#+begin_src scheme :results none
+  (define rember-f
+    (lambda (test?)
+      (lambda (a l)
+        (cond
+         ((null? l) '())
+         ((test? (car l) a) (cdr l))
+         (else (cons (car l)
+                     ((rember-f test?) a
+                      (cdr l))))))))
+#+end_src
+
+#+begin_src scheme
+  (define rember-eq? (rember-f eq?))
+  (rember-eq? 'tuna '(tuna salad is good))
+#+end_src
+
+#+RESULTS:
+| salad | is | good |
+
+#+begin_src scheme
+  ((rember-f eq?) 'tuna '(tuna salad is good))
+#+end_src
+
+#+RESULTS:
+| salad | is | good |
+
+#+begin_src scheme
+  ((rember-f eq?) 'tuna '(shrimp salad and tuna salad))
+#+end_src
+
+#+RESULTS:
+| shrimp | salad | and | salad |
+
+#+begin_src scheme
+  ((rember-f eq?) 'eq? '(equal? eq? eqan? eqlist? eqpair?))
+#+end_src
+
+#+RESULTS:
+| equal? | eqan? | eqlist? | eqpair? |
+
+** insertL-f
+
+#+begin_src scheme :results none
+  (define insertL-f
+    (lambda (test?)
+      (lambda (new old l)
+        (cond
+         ((null? l) '())
+         ((test? (car l) old)
+          (cons new (cons old (cdr l))))
+         (else (cons car l)
+               ((insertL-f test?) new old
+                (cdr l)))))))
+#+end_src
+
+** insertR-f
+
+#+begin_src scheme :results none
+  (define insertR-f
+    (lambda (test?)
+      (lambda (new old l)
+        (cond
+         ((null? l) '())
+         ((test? (car l) old)
+          (cons old (cons new (cdr l))))
+         (else (cons car l)
+               ((insertR-f test?) new old
+                (cdr l)))))))
+#+end_src
+
+** insert-g
+
+#+begin_src scheme :results none
+  (define seqL
+    (lambda (new old l)
+      (cons new (cons old l))))
+
+  (define seqR
+    (lambda (new old l)
+      (cons old (cons new l))))
+
+  (define insert-g
+    (lambda (seq)
+      (lambda (new old l)
+        (cond
+         ((null? l) '())
+         ((eq? (car l) old)
+          (seq new old (cdr l)))
+         (else (cons (car l)
+                     ((insert-g seq) new old
+                      (cdr l))))))))
+
+  (define insertL (insert-g seqL))
+  (define insertR (insert-g seqR))
+
+  (define insertL
+    (insert-g
+     (lambda (new old l)
+       (cons new (cons old l)))))
+#+end_src
+
+** The Ninth Commandment
+
+#+begin_quote
+Abstract common patterns with a new function.
+#+end_quote
+
+** atom-to-function
+
+#+begin_src scheme :results none
+  (define atom-to-function
+    (lambda (x)
+      (cond
+       ((eq? x '+) o+)
+       ((eq? x '*) o*)
+       (else expt))))
+#+end_src
+
+#+begin_src scheme
+  (atom-to-function (operator '(+ 5 3)))
+#+end_src
+
+#+RESULTS:
+: #<procedure o+ (n m)>
+
+#+begin_src scheme :results none
+  (define value
+    (lambda (nexp)
+      (cond
+       ((atom? nexp) nexp)
+       (else
+        ((atom-to-function
+          (operator nexp))
+         (value (1st-sub-exp nexp))
+         (value (2nd-sub-exp nexp)))))))
+#+end_src
+
+** multirember-f
+
+#+begin_src scheme :results none
+  (define multirember-f
+    (lambda (test?)
+      (lambda (a lat)
+        (cond
+         ((null? lat) '())
+         ((test? a (car lat))
+          ((multirember-f test?) a
+           (cdr lat)))
+         (else (cons (car lat)
+                     ((multirember-f test?) a
+                      (cdr lat))))))))
+#+end_src
+
+#+begin_src scheme
+  ((multirember-f eq?) 'tuna '(shrimp salad tuna salad and tuna))
+#+end_src
+
+#+RESULTS:
+| shrimp | salad | salad | and |
+
+** multiremberT
+
+#+begin_src scheme :results none
+  (define eq?-tuna
+    (eq?-c 'tuna))
+#+end_src
+
+#+begin_src scheme :results none
+  (define multiremberT
+    (lambda (test? lat)
+      (cond
+       ((null? lat) '())
+       ((test? (car lat))
+        (multiremberT test? (cdr lat)))
+       (else (cons (car lat)
+                   (multiremberT test?
+                                 (cdr lat)))))))
+#+end_src
+
+#+begin_src scheme
+  (multiremberT eq?-tuna '(shrimp salad tuna salad and tuna))
+#+end_src
+
+#+RESULTS:
+| shrimp | salad | salad | and |
+
+** multirember&co
+
+#+begin_src scheme :results none
+  (define multirember&co
+    (lambda (a lat col)
+      (cond
+       ((null? lat)
+        (col '() '()))
+       ((eq? (car lat) a)
+        (multirember&co a
+                        (cdr lat)
+                        (lambda (newlat seen)
+                          (col newlat
+                               (cons (car lat) seen)))))
+       (else
+        (multirember&co a
+                        (cdr lat)
+                        (lambda (newlat seen)
+                          (col (cons (car lat) newlat)
+                               seen)))))))
+#+end_src
+
+#+begin_src scheme :results none
+  (define a-friend
+    (lambda (x y)
+      (null? y)))
+#+end_src
+
+#+begin_src scheme
+  (multirember&co 'tuna '(strawberries tuna and swordfish) a-friend)
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (multirember&co 'tuna '() a-friend)
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (multirember&co 'tuna '(tuna) a-friend)
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (multirember&co 'tuna '(and tuna) a-friend)
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (multirember&co 'tuna '(strawberries tuna and swordfish)
+                  (lambda (x y) (length x)))
+#+end_src
+
+#+RESULTS:
+: 3
+
+#+begin_src scheme
+  (multirember&co 'tuna '(strawberries tuna and swordfish)
+                  (lambda (x y) (length y)))
+#+end_src
+
+#+RESULTS:
+: 1
+
+** The Tenth Commandment
+
+#+begin_quote
+Build functions to collect more than one value at a time.
+#+end_quote
+
+** multiinsertLR&co
+
+#+begin_src scheme :results none
+  (define multiinsertLR&co
+    (lambda (new oldL oldR lat col)
+      (cond
+       ((null? lat)
+        (col '() 0 0))
+       ((eq? (car lat) oldL)
+        (multiinsertLR&co new oldL oldR
+                          (cdr lat)
+                          (lambda (newlat L R)
+                            (col (cons new
+                                       (cons oldL newlat))
+                                 (add1 L) R))))
+       ((eq? (car lat) oldR)
+        (multiinsertLR&co new oldL oldR
+                          (cdr lat)
+                          (lambda (newlat L R)
+                            (col (cons oldR
+                                       (cons new newlat))
+                                 L (add1 R)))))
+       (else
+        (multiinsertLR&co new oldL oldR
+                          (cdr lat)
+                          (lambda (newlat L R)
+                            (col (cons (car lat) newlat) L R)))))))
+#+end_src
+
+** evens-only*
+
+#+begin_src scheme :results none
+  (define evens-only*
+    (lambda (l)
+      (cond
+       ((null? l) '())
+       ((atom? (car l))
+        (cond
+         ((even? (car l))
+          (cons (car l)
+                (evens-only* (cdr l))))
+         (else (evens-only* (cdr l)))))
+       (else (cons (evens-only* (car l))
+                   (evens-only* (cdr l)))))))
+#+end_src
+
+#+begin_src scheme
+  (evens-only* '((9 1 2 8) 3 10 ((9 9) 7 6) 2))
+#+end_src
+
+#+RESULTS:
+| (2 8) | 10 | (nil 6) | 2 |
+
+** evens-only*&co
+
+#+begin_src scheme :results none
+  (define evens-only*&co
+    (lambda (l col)
+      (cond
+       ((null? l)
+        (col '() 1 0))
+       ((atom? (car l))
+        (cond
+         ((even? (car l))
+          (evens-only*&co (cdr l)
+                          (lambda (newl p s)
+                            (col (cons (car l) newl)
+                                 (o* (car l) p) s))))
+         (else (evens-only*&co (cdr l)
+                               (lambda (newl p s)
+                                 (col newl
+                                      p (o+ (car l) s)))))))
+        (else (evens-only*&co (car l)
+                              (lambda (al ap as)
+                                (evens-only*&co (cdr l)
+                                                 (lambda (dl dp ds)
+                                                   (col (cons al dl)
+                                                        (o* ap dp)
+                                                        (o+ as ds))))))))))
+#+end_src
+
+#+begin_src scheme
+  (define the-last-friend
+    (lambda (newl product sum)
+      (cons sum
+            (cons product newl))))
+
+  (evens-only*&co '((9 1 2 8) 3 10 ((9 9) 7 6) 2)
+                  the-last-friend)
+
+#+end_src
+
+#+RESULTS:
+| 38 | 1920 | (2 8) | 10 | (nil 6) | 2 |
 
 * TODO Chapter 09: ... and Again, and Again, and Again, ...
 :PROPERTIES:
