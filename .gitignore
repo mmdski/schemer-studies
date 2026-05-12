@@ -2,6 +2,7 @@
 *.ss#*
 .#*.ss
 
+*.scm
 *.scm~
 *.scm#*
 .#*.scm
@@ -12,4 +13,4 @@
 
 .DS_Store
 
-tls.scm
+ltximg/
