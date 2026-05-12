@@ -1,0 +1,25 @@
+#+title: Notes on Teach Yourself Scheme in Fixnum Days
+#+author: Marian Domanski
+#+date: <2026-05-11 Mon 14:09>
+#+startup: overview
+
+* 1. Enter Scheme
+:PROPERTIES:
+:header-args:scheme: :session tys01
+:END:
+
+#+begin_src scheme :tangle "hello.scm" :results output
+  ;The first program
+
+  (begin
+    (display "Hello, World!")
+    (newline))
+#+end_src
+
+#+RESULTS:
+: Hello, World!
+
+* 2. Data types
+:PROPERTIES:
+:header-args:scheme: :session tys02
+:END:
