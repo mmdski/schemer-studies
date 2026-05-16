@@ -23,3 +23,333 @@
 :PROPERTIES:
 :header-args:scheme: :session tys02
 :END:
+
+** 2.1 Simple Data Types
+
+*** 2.1.1. Booleans
+
+#+begin_src scheme
+  (boolean? #t)
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (boolean? "Hello, World!")
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (not #f)
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src scheme
+  (not #t)
+#+end_src
+
+#+RESULTS:
+: #f
+
+#+begin_src scheme
+  (not "Hello, World!")
+#+end_src
+
+#+RESULTS:
+: #f
+
+*** 2.1.2 Numbers
+* 5. Lexical variables
+:PROPERTIES:
+:header-args:scheme: :session tys05
+:END:
+
+#+begin_src scheme :tangle "tyscheme.scm" :results none
+  (define add2 (lambda (x) (+ x 2)))
+#+end_src
+
+#+begin_src scheme :tangle "tyscheme.scm" :results none
+  (define throw-one-die
+    (lambda ()
+      (let ((result (ceiling (* (random 1.0) 6))))
+        result)))
+#+end_src
+
+#+begin_src scheme :tangle "tyscheme.scm" :results none
+  (define throw-two-dice
+    (lambda ()
+      (+ (throw-one-die) (throw-one-die))))
+#+end_src
+
+* 6. Recursion
+:PROPERTIES:
+:header-args:scheme: :session tys06
+:END:
+
+#+begin_src scheme :results none
+  (load "tyscheme.scm")
+#+end_src
+
+** 6.2 Named let
+
+#+begin_src scheme :results output
+  (let countdown ((i 10))
+    (if (= i 0) (display "liftoff")
+        (begin
+          (display i)
+          (newline)
+          (countdown (- i 1)))))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+liftoff
+#+end_example
+
+** 6.3 Iteration
+
+#+begin_src scheme :results none
+  (define *num-trials* 10000)
+
+  (define monte-carlo
+    (lambda (experiment)
+      (let loop ((i 0) (acc 0.0))
+        (if (= i *num-trials*)
+            (/ acc *num-trials*)
+            (loop (+ i 1) (+ acc (experiment)))))))
+#+end_src
+
+#+begin_src scheme
+  (monte-carlo throw-one-die)
+#+end_src
+
+#+RESULTS:
+: 3.4856
+
+#+begin_src scheme
+  (monte-carlo throw-two-dice)
+#+end_src
+
+#+RESULTS:
+: 7.0088
+
+** 6.4 Mapping a procedure across a list
+
+#+begin_src scheme
+  (map add2 '(1 2 3))
+#+end_src
+
+#+RESULTS:
+| 3 | 4 | 5 |
+
+#+begin_src scheme :results output
+  (for-each display
+            (list "one " "two " "buckle my shoe"))
+#+end_src
+
+#+RESULTS:
+: one two buckle my shoe
+
+#+begin_src scheme
+  (map cons '(1 2 3) '(10 20 30))
+#+end_src
+
+#+RESULTS:
+: ((1 . 10) (2 . 20) (3 . 30))
+
+#+begin_src scheme
+  (map + '(1 2 3) '(10 20 30))
+#+end_src
+
+#+RESULTS:
+| 11 | 22 | 33 |
+
+* 7. I/O
+:PROPERTIES:
+:header-args:scheme: :session tys07
+:END:
+
+** 7.3 File ports
+
+#+begin_src text :tangle hello.txt
+  hello
+#+end_src
+
+#+begin_src scheme :results output
+  (define i (open-input-file "hello.txt"))
+  (display (read-char i))
+  (close-input-port i)
+#+end_src
+
+#+RESULTS:
+: h
+
+#+begin_src scheme :results output
+  (define i (open-input-file "hello.txt"))
+  (read-char i)
+  (define j (read i))
+  (display j)
+  (close-input-port i)
+#+end_src
+
+#+RESULTS:
+: ello
+
+#+begin_src scheme :results output
+  (use-modules (ice-9 rdelim))
+
+  (define o (open-output-file "greeting.txt"))
+
+  (display "hello" o)
+  (write-char #\space o)
+  (display 'world o)
+  (newline o)
+
+  (close-output-port o)
+
+  (define i (open-input-file "greeting.txt"))
+  (display (read-line i))
+  (close-input-port i)
+#+end_src
+
+#+RESULTS:
+: hello world
+
+*** 7.3.1 Automatic opening and closing of file ports
+
+#+begin_src scheme :results verbatim
+  (call-with-input-file "hello.txt"
+    (lambda (i)
+      (let* ((a (read-char i))
+             (b (read-char i))
+             (c (read-char i)))
+        (list a b c))))
+#+end_src
+
+#+RESULTS:
+: (#\h #\e #\l)
+
+** 7.4 String ports
+
+#+begin_src scheme
+  (define i (open-input-string "hello world"))
+  (read-char i)
+#+end_src
+
+#+RESULTS:
+: #\h
+
+#+begin_src scheme
+  (read i)
+#+end_src
+
+#+RESULTS:
+: ello
+
+#+begin_src scheme
+  (read i)
+#+end_src
+
+#+RESULTS:
+: world
+
+#+begin_src scheme
+  (define o (open-output-string))
+
+  (write 'hello o)
+  (write-char #\, o)
+  (display " " o)
+  (display "world" o)
+
+  (get-output-string o)
+#+end_src
+
+#+RESULTS:
+: hello, world
+
+* 8. Macros
+:PROPERTIES:
+:header-args:scheme: :session tys08
+:END:
+
+* 9. Structures
+:PROPERTIES:
+:header-args:scheme: :session tys09
+:END:
+
+#+begin_src scheme :results none
+  (define-macro defstruct
+    (lambda (s . ff)
+      (let ((s-s (symbol->string s)) (n (length ff)))
+        (let* ((n+1 (+ n 1))
+               (vv (make-vector n+1)))
+          (let loop ((i 1) (ff ff))
+            (if (<= i n)
+                (let ((f (car ff)))
+                  (vector-set! vv i
+                               (if (pair? f) (cadr f) '(if #f #f)))
+                  (loop (+ i 1) (cdr ff)))))
+          (let ((ff (map (lambda (f) (if (pair? f) (car f) f))
+                         ff)))
+            `(begin
+               (define ,(string->symbol
+                         (string-append "make-" s-s))
+                 (lambda fvfv
+                   (let ((st (make-vector ,n+1)) (ff ',ff))
+                     (vector-set! st 0 ',s)
+                     ,@(let loop ((i 1) (r '()))
+                         (if (>= i n+1) r
+                             (loop (+ i 1)
+                                   (cons `(vector-set! st ,i
+                                                       ,(vector-ref vv i))
+                                         r))))
+                     (let loop ((fvfv fvfv))
+                       (if (not (null? fvfv))
+                           (begin
+                             (vector-set! st
+                                          (+ (list-position (car fvfv) ff)
+                                             1)
+                                          (cadr fvfv))
+                             (loop (cddr fvfv)))))
+                     st)))
+               ,@(let loop ((i 1) (procs '()))
+                   (if (>= i n+1) procs
+                       (loop (+ i 1)
+                             (let ((f (symbol->string
+                                       (list-ref ff (- i 1)))))
+                               (cons
+                                `(define ,(string->symbol
+                                           (string-append
+                                            s-s "." f))
+                                   (lambda (x) (vector-ref x ,i)))
+                                (cons
+                                 `(define ,(string->symbol
+                                            (string-append
+                                             "set!" s-s "." f))
+                                    (lambda (x v)
+                                      (vector-set! x ,i v)))
+                                 procs))))))
+               (define ,(string->symbol (string-append s-s "?"))
+                 (lambda (x)
+                   (and (vector? x)
+                        (eqv? (vector-ref x 0) ',s))))))))))
+#+end_src
+
+#+begin_src scheme
+  (defstruct tree height girth age leaf-shape leaf-color)
+#+end_src
